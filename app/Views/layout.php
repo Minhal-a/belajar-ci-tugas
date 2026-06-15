@@ -74,10 +74,8 @@ if(uri_string()!=""){
 
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">Datatables</h5>
-              
+              <h5 class="card-title"><?= $hlm?></h5>
               <?= $this->renderSection('content') ?>
-        
             </div>
           </div>
 
