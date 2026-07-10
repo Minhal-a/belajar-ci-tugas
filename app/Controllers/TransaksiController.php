@@ -8,12 +8,14 @@ use App\Services\RajaOngkirService;
 
 use App\Models\TransactionModel;
 use App\Models\TransactionDetailModel;
+use App\Models\DiscountModel;
 
 class TransaksiController extends BaseController
 {
     protected $cart;
     protected $transactionModel;
     protected $transactionDetailModel;
+    protected $discountModel;
 
     public function __construct()
     {
@@ -21,13 +23,29 @@ class TransaksiController extends BaseController
         $this->cart = service('cart');
         $this->transactionModel = new TransactionModel();
         $this->transactionDetailModel = new TransactionDetailModel(); 
+        $this->discountModel = new DiscountModel();
     }
 
     public function index()
     {  
+        $diskonHariIni = $this->discountModel->getDiskonHariIni();
+        $nominalDiskon = $diskonHariIni ? $diskonHariIni['nominal'] : 0;
+
+        $items = $this->cart->contents();
+        $total = 0;
+
+        foreach ($items as &$item) {
+            $hargaSetelahDiskon = max(0, $item['price'] - $nominalDiskon);
+            $item['harga_setelah_diskon'] = $hargaSetelahDiskon;
+            $item['subtotal_setelah_diskon'] = $hargaSetelahDiskon * $item['qty'];
+            $total += $item['subtotal_setelah_diskon'];
+        }
+        unset($item);
+
         $data = [
-            'items' => $this->cart->contents(), 
-            'total' => $this->cart->total() 
+            'items'         => $items,
+            'total'         => $total,
+            'diskonHariIni' => $diskonHariIni
         ];
 
         return view('v_keranjang', $data);
@@ -100,9 +118,24 @@ class TransaksiController extends BaseController
 
     public function checkout()
     {  
+        $diskonHariIni = $this->discountModel->getDiskonHariIni();
+        $nominalDiskon = $diskonHariIni ? $diskonHariIni['nominal'] : 0;
+
+        $items = $this->cart->contents();
+        $total = 0;
+
+        foreach ($items as &$item) {
+            $hargaSetelahDiskon = max(0, $item['price'] - $nominalDiskon);
+            $item['harga_setelah_diskon'] = $hargaSetelahDiskon;
+            $item['subtotal_setelah_diskon'] = $hargaSetelahDiskon * $item['qty'];
+            $total += $item['subtotal_setelah_diskon'];
+        }
+        unset($item);
+
         $data = [
-            'items' => $this->cart->contents(),
-            'total' => $this->cart->total() 
+            'items'         => $items,
+            'total'         => $total,
+            'diskonHariIni' => $diskonHariIni
         ];
 
         return view('v_checkout', $data);
@@ -169,12 +202,16 @@ class TransaksiController extends BaseController
             return redirect()->back();
         }
 
+        $diskonHariIni = $this->discountModel->getDiskonHariIni();
+        $nominalDiskon = $diskonHariIni ? $diskonHariIni['nominal'] : 0;
+
         $db = \Config\Database::connect();
         $db->transStart(); 
 
         $subtotal = 0;
         foreach ($cartItems as $item) {
-            $subtotal += $item['qty'] * $item['price'];
+            $hargaSetelahDiskon = max(0, $item['price'] - $nominalDiskon);
+            $subtotal += $item['qty'] * $hargaSetelahDiskon;
         }
 
         $ongkir = (int) $this->request->getPost('ongkir');
@@ -197,12 +234,14 @@ class TransaksiController extends BaseController
 
         // insert transaction detail
         foreach ($cartItems as $item) {
+            $hargaSetelahDiskon = max(0, $item['price'] - $nominalDiskon);
+
             $this->transactionDetailModel->insert([
                 'transaction_id' => $transactionId,
                 'product_id'     => $item['id'],
                 'jumlah'         => $item['qty'],
-                'diskon'         => 0,
-                'subtotal_harga' => $item['qty'] * $item['price'] 
+                'diskon'         => $nominalDiskon,
+                'subtotal_harga' => $item['qty'] * $hargaSetelahDiskon
             ]);
         }
 
@@ -212,7 +251,7 @@ class TransaksiController extends BaseController
             return redirect()->back()->with('error', 'Gagal membuat transaksi');
         }
 
-            //hapus session keranjang belanja 
+        // hapus session keranjang belanja 
         $this->cart->destroy();
         return redirect()->to(base_url());
     }

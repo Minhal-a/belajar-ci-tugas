@@ -1,3 +1,8 @@
+<?php
+helper('number');
+$discountModel = new \App\Models\DiscountModel();
+$diskonHariIni = $discountModel->getDiskonHariIni();
+?>  
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top d-flex align-items-center">
 
@@ -15,6 +20,13 @@
         <button type="submit" title="Search"><i class="bi bi-search"></i></button>
       </form>
     </div><!-- End Search Bar -->
+
+    <?php if ($diskonHariIni) : ?>
+    <div class="d-none d-md-flex align-items-center px-3 py-1 rounded-pill text-white ms-3" style="background-color:#2ecc71; white-space:nowrap; font-size:14px;">
+      <i class="bi bi-tags-fill me-2"></i>
+      Hari ini ada diskon <?= number_to_currency($diskonHariIni['nominal'], 'IDR') ?> per item
+    </div>
+    <?php endif; ?>
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">

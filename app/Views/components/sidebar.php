@@ -26,6 +26,24 @@
       </li><!-- End Produk Nav -->
       <?php endif; ?>
 
+      <?php if(session()->get('role') == 'admin'): ?>
+      <li class="nav-item">
+        <a class="nav-link <?= uri_string() == 'diskon' ? '' : 'collapsed' ?>" href="<?= base_url('diskon') ?>">
+          <i class="bi bi-tag"></i>
+          <span>Diskon</span>
+        </a>
+      </li><!-- End Diskon Nav -->
+      <?php endif; ?>
+
+      <?php if(session()->get('role') == 'admin'): ?>
+      <li class="nav-item">
+        <a class="nav-link <?= uri_string() == 'pembelian' ? '' : 'collapsed' ?>" href="<?= base_url('pembelian') ?>">
+          <i class="bi bi-bag-check"></i>
+          <span>Pembelian</span>
+        </a>
+      </li><!-- End Pembelian Nav -->
+      <?php endif; ?>
+
       <li class="nav-item">
           <a class="nav-link <?php echo (uri_string() == 'history') ? "" : "collapsed" ?>" href="history">
               <i class="bi bi-person"></i>

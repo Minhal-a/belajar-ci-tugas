@@ -32,9 +32,18 @@ if (session()->getFlashData('success')) {
                 <tr>
                     <td><?php echo $item['name'] ?></td>
                     <td><img src="<?php echo base_url() . "img/" . $item['options']['foto'] ?>" width="100px"></td>
-                    <td><?php echo number_to_currency($item['price'], 'IDR') ?></td> 
+                    <td>
+                        <?php if (!empty($diskonHariIni)) : ?>
+                            <span class="text-decoration-line-through text-danger">
+                                <?= number_to_currency($item['price'], 'IDR') ?>
+                            </span><br>
+                            <?= number_to_currency($item['harga_setelah_diskon'], 'IDR') ?>
+                        <?php else : ?>
+                            <?= number_to_currency($item['price'], 'IDR') ?>
+                        <?php endif; ?>
+                    </td>
                     <td><input type="number" min="1" name="qty<?php echo $i++ ?>" class="form-control" value="<?php echo $item['qty'] ?>"></td>
-                    <td><?php echo number_to_currency($item['subtotal'], 'IDR') ?></td>
+                    <td><?php echo number_to_currency($item['subtotal_setelah_diskon'], 'IDR') ?></td>
                     <td>
                         <a href="<?php echo base_url('keranjang/delete/' . $item['rowid'] . '') ?>" class="btn btn-danger"><i class="bi bi-trash"></i></a>
                     </td>

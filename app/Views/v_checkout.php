@@ -64,9 +64,18 @@
                 ?>
                         <tr>
                             <td><?= $item['name'] ?></td>
-                            <td><?= number_to_currency($item['price'], 'IDR') ?></td>
+                            <td>
+                                <?php if (!empty($diskonHariIni)) : ?>
+                                    <span class="text-decoration-line-through text-danger">
+                                        <?= number_to_currency($item['price'], 'IDR') ?>
+                                    </span><br>
+                                    <?= number_to_currency($item['harga_setelah_diskon'], 'IDR') ?>
+                                <?php else : ?>
+                                    <?= number_to_currency($item['price'], 'IDR') ?>
+                                <?php endif; ?>
+                            </td>
                             <td><?= $item['qty'] ?></td>
-                            <td><?= number_to_currency($item['price'] * $item['qty'], 'IDR') ?></td>
+                            <td><?= number_to_currency($item['subtotal_setelah_diskon'], 'IDR') ?></td>
                         </tr>
                 <?php
                     endforeach;
